@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">GraphKR</string>
+    <string-array name="node_colors">
+        <item>Rouge</item>
+        <item>Vert</item>
+        <item>Bleu</item>
+        <item>Orange</item>
+        <item>Cyan</item>
+        <item>Magenta</item>
+        <item>Noir</item>
+    </string-array>
+    <string name="node">Noeud</string>
+    <string name="arc">Arc</string>
+    <string name="modification">Modification</string>
+    <string name="etiquette">Etiquette</string>
+    <string name="size">Taille</string>
+    <string name="width">Epaisseur</string>
+    <string name="delete">Supprimer</string>
+</resources>
