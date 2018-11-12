@@ -62,5 +62,14 @@
                 android:layout_weight="1"
                 android:text="@string/modification" />
         </RadioGroup>
+
+        <Button
+            android:id="@+id/resetButton"
+            android:layout_width="41dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+
+            />
     </android.support.constraint.ConstraintLayout>
 </android.support.v4.widget.DrawerLayout>

@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         rGroup = findViewById(R.id.radioGroup);
         rGroup.check(R.id.nodeRadioButton);
 
-        //Ajout d'un listener sur l'ImageView
+        //Ajout d'un listene    r sur l'ImageView
         ViewTreeObserver vto = backgroundImageView.getViewTreeObserver();
         vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             public boolean onPreDraw() {
@@ -129,12 +129,15 @@ public class MainActivity extends AppCompatActivity {
                         upx = (int) event.getX();
                         upy = (int) event.getY();
                         //Si le mode est "noeud", qu'un noeud est séléctionné, qu'il n'a pas été déplacé et que l'utilisateur reste appuyé plus d'une seconde dessus, on ouvre le menu de modification du noeud
-                        if((Math.abs(downx - upx) < currentNode.getWidth())
+                        if(currentNode != null && (Math.abs(downx - upx) < currentNode.getWidth())
                                 && (Math.abs(downy - upy) < currentNode.getHeight())
                                 && System.currentTimeMillis() - touchStartTime > LONG_TOUCH_DURATION
                                 && rGroup.getCheckedRadioButtonId() == R.id.modificationRadioButton){
-                            if(currentNode != null)
-                                createDialogNodeModif(currentNode);
+                            createDialogNodeModif(currentNode);
+                        }
+                        else if(currentNode == null && System.currentTimeMillis() - touchStartTime > LONG_TOUCH_DURATION
+                                    && rGroup.getCheckedRadioButtonId() == R.id.nodeRadioButton){
+                                createDialogNodeCreation(upx,upy);
 
                         }else{
                             //Si un arc a été créé, mais qu'il n'arrive pas sur un autre noeud, on le supprime
@@ -242,6 +245,46 @@ public class MainActivity extends AppCompatActivity {
                 backgroundImageView.invalidate();
             }
         });
+        alertDialog.show();
+    }
+
+    public void createDialogNodeCreation(final int upx, final int upy){
+        LayoutInflater li = LayoutInflater.from(context);
+        //Les différents champs "étiquette", "taille" et "couleur"
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        View v = li.inflate(R.layout.node_creation,null);
+        final TextInputEditText etiquette = v.findViewById(R.id.etiquetteEditText);
+        final TextInputEditText taille = v.findViewById(R.id.tailleEditText);
+        final Spinner color = v.findViewById(R.id.colorSpinner);
+        Button delButton = v.findViewById(R.id.delNodeButton);
+        alertDialogBuilder.setView(v);
+        alertDialogBuilder
+                .setCancelable(false)
+                //Validation des modifications
+                .setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                String etiq = "";
+                                if(""+etiquette.getText() != "")
+                                    etiq = ""+etiquette.getText();
+                                int width = 0;
+                                if(""+taille.getText() != "")
+                                    width = Integer.parseInt(""+taille.getText());
+                                String col = "";
+                                col = ""+color.getSelectedItem().toString();
+                                Node node = new Node(upx,upy,width,col,etiq);
+                                graph.AddNode(node);
+                                backgroundImageView.invalidate();
+                            }
+                        })
+                //Annulation des modifications
+                .setNegativeButton("Annuler",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                dialog.cancel();
+                            }
+                        });
+        final AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
 }

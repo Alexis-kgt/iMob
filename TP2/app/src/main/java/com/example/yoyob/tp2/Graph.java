@@ -47,6 +47,10 @@ public class Graph {
         return nodes;
     }
 
+    public void AddNode(Node n){
+        n.setHeight(MAX_X / 15);
+        this.nodes.add(n);
+    }
     /**
      * @param node le noeud à supprimer
      */

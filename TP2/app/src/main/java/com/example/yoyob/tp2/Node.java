@@ -22,13 +22,28 @@ public class Node {
         colors.put("Rouge",Color.RED);
         colors.put("Vert",Color.GREEN);
         colors.put("Bleu",Color.BLUE);
-        colors.put("Orange",0xffa500);
+        colors.put("Orange",Color.rgb(255,165,0));
         colors.put("Cyan",Color.CYAN);
         colors.put("Magenta",Color.MAGENTA);
         colors.put("Noir",Color.BLACK);
     }
 
     public static String DEFAULT_ETIQ = "";
+
+    /**
+     * Constructeur
+     * @param x coordonnées (x,y)
+     * @param y coordonnées (x,y)
+     * @param width largeur du noeud
+     * @param color couleur du noeud
+     */
+    public Node(int x, int y, int width, String color, String etiquette) {
+        this.x = x;
+        this.y = y;
+        this.color = colors.get(color);
+        this.width = width;
+        this.etiquette = etiquette;
+    }
 
     /**
      * Constructeur
@@ -46,7 +61,6 @@ public class Node {
         this.height = height;
         this.etiquette = "blabla";
     }
-
     /**
      * @return x la position x du noeud
      */
