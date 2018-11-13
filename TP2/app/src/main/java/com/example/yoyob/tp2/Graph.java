@@ -3,8 +3,9 @@ package com.example.yoyob.tp2;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.io.Serializable;
 
-public class Graph {
+public class Graph implements Serializable {
 
     public int MAX_X, MAX_Y;
     private List<Node> nodes = new ArrayList<Node>();/*Les nodes du graphe*/
@@ -47,6 +48,9 @@ public class Graph {
         return nodes;
     }
 
+    public void setNodes(ArrayList<Node> nodes){
+        this.nodes = nodes;
+    }
     public void AddNode(Node n){
         n.setHeight(MAX_X / 15);
         this.nodes.add(n);
@@ -73,6 +77,9 @@ public class Graph {
         return arcs;
     }
 
+    public void setArcs(ArrayList<Arc> arcs){
+        this.arcs = arcs;
+    }
     /**
      * @param arc l'arc à ajouter
      */
