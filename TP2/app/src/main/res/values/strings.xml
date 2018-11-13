@@ -11,6 +11,8 @@
     </string-array>
     <string name="node">Noeud</string>
     <string name="arc">Arc</string>
+    <string name="arcName">Nom de l\'arc</string>
+    <string name="graphName">Nom du graphe</string>
     <string name="modification">Modification</string>
     <string name="etiquette">Etiquette</string>
     <string name="size">Taille</string>

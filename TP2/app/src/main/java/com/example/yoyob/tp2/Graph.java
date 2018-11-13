@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 public class Graph implements Serializable {
 
-    public int MAX_X, MAX_Y;
+    public int MAX_X, MAX_Y, MAX_ID_NODE = -1, MAX_ID_ARC = -1;
     private List<Node> nodes = new ArrayList<Node>();/*Les nodes du graphe*/
     private List<Arc> arcs = new ArrayList<Arc>();/*Les arcs du graphe*/
 
@@ -36,9 +36,11 @@ public class Graph implements Serializable {
             else
                 y = MAX_Y - 50 - nodeSize;
             Node node = new Node(x,y,nodeSize,nodeSize,R.color.colorRectangle);
+            node.setId(i+1);
             node.setEtiquette("n"+(i+1));
             nodes.add(node);
         }
+        MAX_ID_NODE = 9;
     }
 
     /**
@@ -51,7 +53,17 @@ public class Graph implements Serializable {
     public void setNodes(ArrayList<Node> nodes){
         this.nodes = nodes;
     }
+
     public void AddNode(Node n){
+        if(n.getId() <= 0){
+            if(MAX_ID_NODE == -1){
+                n.setId(1);
+                MAX_ID_NODE = 1;
+            }else{
+                n.setId(MAX_ID_NODE+1);
+                MAX_ID_NODE++;
+            }
+        }
         n.setHeight(MAX_X / 15);
         this.nodes.add(n);
     }
@@ -84,6 +96,15 @@ public class Graph implements Serializable {
      * @param arc l'arc à ajouter
      */
     public void addArc(Arc arc){
+        if(arc.getId() <= 0){
+            if(MAX_ID_ARC == -1){
+                arc.setId(1);
+                MAX_ID_ARC = 1;
+            }else{
+                arc.setId(MAX_ID_ARC+1);
+                MAX_ID_ARC++;
+            }
+        }
         this.arcs.add(arc);
     }
 

@@ -3,14 +3,22 @@ package com.example.yoyob.tp2;
 import android.graphics.Paint;
 import android.graphics.Path;
 
-public class Arc {
+import java.io.Serializable;
+
+public class Arc implements Serializable {
 
     private Node nodeDep, nodeArr;
     private Path path;
     private int id;
     private int color;
+    private int pathMidX, pathMidY;
     private String name;
     private float width = 10f;
+
+
+    public Arc(){
+
+    }
 
     /**
      * Constructeur
@@ -76,9 +84,9 @@ public class Arc {
             int arrX = nodeArr.getX() + (nodeArr.getWidth() / 2);
             int arrY = nodeArr.getY() + (nodeArr.getHeight() / 2);
             this.path.moveTo(depX,depY);
-            int midX = (depX + arrX) / 2;
-            int midY = (depY + arrY) / 2;
-            this.path.quadTo(midX,midY,arrX,arrY);
+            pathMidX = (depX + arrX) / 2;
+            pathMidY = (depY + arrY) / 2;
+            this.path.quadTo(pathMidX,pathMidY,arrX,arrY);
         }
     }
 
@@ -92,9 +100,9 @@ public class Arc {
         int depX = nodeDep.getX() + (nodeDep.getWidth() / 2);
         int depY = nodeDep.getY() + (nodeDep.getHeight() / 2);
         this.path.moveTo(depX,depY);
-        int midX = (depX + movex)/2;
-        int midY = (depY + movey)/2;
-        this.path.quadTo(midX,midY,movex,movey);
+        pathMidX = (depX + movex)/2;
+        pathMidY = (depY + movey)/2;
+        this.path.quadTo(pathMidX,pathMidY,movex,movey);
     }
 
     /**
@@ -109,6 +117,33 @@ public class Arc {
      */
     public void setPath(Path path) {
         this.path = path;
+    }
+
+    /**
+     * @return pathMidX la coordonnée x du milieu de l'arc
+     */
+    public int getPathMidX() {
+        return pathMidX;
+    }
+
+    /**
+     * @param pathMidX la coordonnée x du milieu de l'arc
+     */
+    public void setPathMidX(int pathMidX) {
+        this.pathMidX = pathMidX;
+    }
+    /**
+     * @return pathMidY la coordonnée y du milieu de l'arc
+     */
+    public int getPathMidY() {
+        return pathMidY;
+    }
+
+    /**
+     * @param pathMidY la coordonnée y du milieu de l'arc
+     */
+    public void setPathMidY(int pathMidY) {
+        this.pathMidY = pathMidY;
     }
 
     /**

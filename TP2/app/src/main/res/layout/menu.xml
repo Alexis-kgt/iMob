@@ -35,7 +35,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/resetButton"
-        android:onClick="sauvegarderGraphe"/>
+        android:onClick="createDialogGraphName"/>
 
     <Button
         android:id="@+id/displayButton"
@@ -50,7 +50,8 @@
         android:text="@string/display"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/saveButton" />
+        app:layout_constraintTop_toBottomOf="@+id/saveButton"
+        android:onClick="createDialogChargerGraph"/>
 
     <Button
         android:id="@+id/sendButton"

@@ -2,10 +2,12 @@ package com.example.yoyob.tp2;
 
 import android.graphics.Color;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Node {
+public class Node implements Serializable {
+    private int id;
     private int x;
     private int y;
     private String etiquette;
@@ -29,6 +31,10 @@ public class Node {
     }
 
     public static String DEFAULT_ETIQ = "";
+
+    public Node(){
+
+    }
 
     /**
      * Constructeur
@@ -61,6 +67,20 @@ public class Node {
         this.height = height;
         this.etiquette = "blabla";
     }
+    /**
+     * @return id l'id du noeud
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * @param id l'id du noeud
+     */
+    public void setId(int id) {
+        this.id = id;
+    }
+
     /**
      * @return x la position x du noeud
      */

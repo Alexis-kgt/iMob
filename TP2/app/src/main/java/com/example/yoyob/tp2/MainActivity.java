@@ -3,25 +3,27 @@ package com.example.yoyob.tp2;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Path;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -294,6 +296,72 @@ public class MainActivity extends AppCompatActivity {
         final AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
+    /**
+     * Créer une boite de dialogue pour renseigner le nom du graphe
+     *
+     */
+    public void createDialogGraphName(View v) {
+        LayoutInflater li = LayoutInflater.from(context);
+        View promptsView = li.inflate(R.layout.save_graph, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        alertDialogBuilder.setView(promptsView);
+        final EditText userInput = promptsView.findViewById(R.id.editTextGraphName);
+        alertDialogBuilder
+                .setCancelable(false)
+                //Valider la sauvegarde
+                .setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                sauvegarderGraphe("" + userInput.getText());
+                            }
+                        })
+                //L'arc n'a pas d'étiquette
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+    /**
+     * Créer une boite de dialogue pour charger un graphe
+     *
+     */
+    public void createDialogChargerGraph(View v) {
+        LayoutInflater li = LayoutInflater.from(context);
+        View promptsView = li.inflate(R.layout.load_graph, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        alertDialogBuilder.setView(promptsView);
+        final Spinner grapheNames = promptsView.findViewById(R.id.graphNamesSpinner);
+        String[] files = new String[getFilesDir().listFiles().length];
+        int cpt = 0;
+        for(File file : getFilesDir().listFiles()){
+            files[cpt] = file.getName();
+            cpt++;
+        }
+        grapheNames.setAdapter(new ArrayAdapter<String>(this,R.layout.graph_name_spinner_item,files));
+        final EditText userInput = promptsView.findViewById(R.id.editTextGraphName);
+        alertDialogBuilder
+                .setCancelable(false)
+                //Valider la sauvegarde
+                .setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                chargerGraphe(grapheNames.getSelectedItem().toString());
+                            }
+                        })
+                //L'arc n'a pas d'étiquette
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
 
     public void menuDisplay(View v) {
         LayoutInflater li = LayoutInflater.from(context);
@@ -326,17 +394,133 @@ public class MainActivity extends AppCompatActivity {
         menuDialog.dismiss();
     }
 
-    public void sauvegarderGraphe(View v) {
+    public void sauvegarderGraphe(String nomGraph) {
+        String graphSave = "";
+        for(Node n : graph.getNodes()){
+            graphSave += "NODE#_#_#_#_#id="+n.getId()+"/x="+n.getX()+"/y="+n.getY()+"/etiquette="+n.getEtiquette()+"/color="+n.getColor()+"/width="+n.getWidth()+"/height="+n.getHeight()+"_é_è_é_è_";
+            Log.d("graphSaveNode",graphSave);
+        }
+        for(Arc a : graph.getArcs()){
+            if(a.getNodeDep() != null && a.getNodeArr() != null){
+                graphSave += "ARC#_#_#_#_#id="+a.getId()+"/idNodeDep="+a.getNodeDep().getId()+"/idNodeArr="+a.getNodeArr().getId()+"/color="+a.getColor()+"/name="+a.getName()+"/width="+a.getWidth()+"/pathMidX="+a.getPathMidX()+"/pathMidY="+a.getPathMidY()+"_é_è_é_è_";
+            }
+            Log.d("graphSaveArc",graphSave);
+        }
+        Log.d("graphSave",graphSave);
         try {
-            FileOutputStream fos = context.openFileOutput("unBeauGraphe", Context.MODE_PRIVATE);
+            FileOutputStream fos = context.openFileOutput(nomGraph, Context.MODE_PRIVATE);
             ObjectOutputStream os = new ObjectOutputStream(fos);
-            os.writeObject(graph);
+            os.writeObject(graphSave);
             os.close();
             fos.close();
             Log.d("blaaa", getFilesDir().getPath());
-
         } catch (Exception e) {
             Log.e("save", e.toString());
+        }
+    }
+
+    public void chargerGraphe(String graphName) {
+        try {
+            FileInputStream fis = context.openFileInput(graphName);
+            ObjectInputStream is = new ObjectInputStream(fis);
+            String graphString = (String) is.readObject();
+            is.close();
+            fis.close();
+            Log.d("graphString", graphString);
+            graph.setArcs(new ArrayList<Arc>());
+            graph.setNodes(new ArrayList<Node>());
+            for(String object : graphString.split("_é_è_é_è_")){
+                String type = object.split("#_#_#_#_#")[0];
+                Log.d("graphStringObject", object);
+                String values = object.split("#_#_#_#_#")[1];
+                if(type.contains("NODE")){
+                    Node n = new Node();
+                    for(String keyValue : values.split("/")){
+                        String val = keyValue.split("=")[1];
+                        switch (keyValue.split("=")[0]){
+                            case "id":
+                                n.setId(Integer.parseInt(val));
+                                break;
+                            case "x":
+                                n.setX(Integer.parseInt(val));
+                                break;
+                            case "y":
+                                n.setY(Integer.parseInt(val));
+                                break;
+                            case "etiquette":
+                                n.setEtiquette(val);
+                                break;
+                            case "color":
+                                n.setColor(Integer.parseInt(val));
+                                break;
+                            case "width":
+                                n.setWidth(Integer.parseInt(val));
+                                break;
+                            case "height":
+                                n.setHeight(Integer.parseInt(val));
+                                break;
+                        }
+                    }
+                    graph.AddNode(n);
+                }else if(type.contains("ARC")){
+                    Log.d("graphStringObject", "new arc");
+                    Arc a = new Arc();
+                    int midX = 0, midY = 0;
+                    Node nodeDep = new Node(), nodeArr = new Node();
+                    for(String keyValue : values.split("/")){
+                        String val = "";
+                        if(keyValue.split("=").length > 1)
+                            val = keyValue.split("=")[1];
+                        switch (keyValue.split("=")[0]){
+                            case "id":
+                                a.setId(Integer.parseInt(val));
+                                break;
+                            case "idNodeDep":
+                                for(Node n : graph.getNodes()){
+                                    Log.d("graphStringObject", ""+n.getId());
+                                    Log.d("graphStringObject", ""+Integer.parseInt(val));
+                                    if(n.getId() == Integer.parseInt(val)){
+                                        a.setNodeDep(n);
+                                    }
+                                }
+                                break;
+                            case "idNodeArr":
+                                for(Node n : graph.getNodes()){
+                                    Log.d("graphStringObject", ""+n.getId());
+                                    Log.d("graphStringObject", ""+Integer.parseInt(val));
+                                    if(n.getId() == Integer.parseInt(val)){
+                                        a.setNodeArr(n);
+                                    }
+                                }
+                                break;
+                            case "color":
+                                a.setColor(Integer.parseInt(val));
+                                break;
+                            case "name":
+                                a.setName(val);
+                                break;
+                            case "pathMidX":
+                                midX = Integer.parseInt(val);
+                                break;
+                            case "pathMidY":
+                                midY = Integer.parseInt(val);
+                                break;
+                        }
+                    }
+                    Path path = new Path();
+                    int depX = nodeDep.getX() + (nodeDep.getWidth() / 2);
+                    int depY = nodeDep.getY() + (nodeDep.getHeight() / 2);
+                    int arrX = nodeArr.getX() + (nodeArr.getWidth() / 2);
+                    int arrY = nodeArr.getY() + (nodeArr.getHeight() / 2);
+                    path.moveTo(depX,depY);
+                    path.quadTo(midX,midY,arrX,arrY);
+                    a.setPath(path);
+                    graph.addArc(a);
+                }
+            }
+            backgroundImageView.invalidate();
+        } catch (Exception e) {
+            Log.e("load", e.toString());
         }
     }
 }
