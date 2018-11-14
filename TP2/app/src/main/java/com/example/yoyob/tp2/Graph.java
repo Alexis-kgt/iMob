@@ -128,6 +128,19 @@ public class Graph implements Serializable {
         }
         return selected;
     }
+    /**
+     * @param x coordonnées (x,y)
+     * @param y coordonnées (x,y)
+     * @return le milieu de l'arc sélectionné s'il y en a un, null sinon
+     */
+    public Arc midArcSelected(int x, int y){
+        Arc selected = null;
+        for (Arc a: arcs) {
+            if(x > a.getPathMidX()-30 && x < a.getPathMidX()+30 && y > a.getPathMidY()-30 && y < a.getPathMidY()+30)
+                selected = a;
+        }
+        return selected;
+    }
 
     /**
      *

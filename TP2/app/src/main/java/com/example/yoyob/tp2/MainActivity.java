@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     Node currentNode;
     Arc currentArc;
+    Arc arcToCurve;
 
     int downx = 0, downy = 0, upx = 0, upy = 0;
 
@@ -99,9 +100,17 @@ public class MainActivity extends AppCompatActivity {
                             currentArc.setNodeDep(currentNode);
                             graph.addArc(currentArc);
                         }
+                        else if(graph.midArcSelected(downx,downy) != null){
+                            Log.d("arcToCurve","arcToCurve");
+                            arcToCurve = graph.midArcSelected(downx,downy);
+                            currentNode = null;
+                            currentArc = null;
+                        }
                         // Sinon le noeud courant devient null
                         else {
+                            arcToCurve = null;
                             currentNode = null;
+                            currentArc = null;
                         }
                         break;
                     //Lorsque l'utilisateur bouge son doigt sur l'écran
@@ -127,6 +136,9 @@ public class MainActivity extends AppCompatActivity {
                                 if (currentArc != null)
                                     currentArc.updatePath(movex, movey);
                             }
+                        }else if(arcToCurve != null && rGroup.getCheckedRadioButtonId() == R.id.modificationRadioButton){
+                            Log.d("updatePath","hfbe");
+                            arcToCurve.updateMidPath(movex,movey);
                         }
                         //Mise à jour de l'écran
                         backgroundImageView.invalidate();

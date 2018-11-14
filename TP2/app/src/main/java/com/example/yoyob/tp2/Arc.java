@@ -2,6 +2,7 @@ package com.example.yoyob.tp2;
 
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.util.Log;
 
 import java.io.Serializable;
 
@@ -77,6 +78,7 @@ public class Arc implements Serializable {
      * Met à jour l'objet Path en fonction de la position des noeuds
      */
     public void updatePath(){
+        Log.d("updatePath","oui");
         if(nodeArr != null){
             this.path = new Path();
             int depX = nodeDep.getX() + (nodeDep.getWidth() / 2);
@@ -84,8 +86,6 @@ public class Arc implements Serializable {
             int arrX = nodeArr.getX() + (nodeArr.getWidth() / 2);
             int arrY = nodeArr.getY() + (nodeArr.getHeight() / 2);
             this.path.moveTo(depX,depY);
-            pathMidX = (depX + arrX) / 2;
-            pathMidY = (depY + arrY) / 2;
             this.path.quadTo(pathMidX,pathMidY,arrX,arrY);
         }
     }
@@ -96,6 +96,7 @@ public class Arc implements Serializable {
      * @param movey la coordonnée y du doigt de l'utilisateur
      */
     public void updatePath(int movex, int movey){
+        Log.d("updatePath","oui");
         this.path = new Path();
         int depX = nodeDep.getX() + (nodeDep.getWidth() / 2);
         int depY = nodeDep.getY() + (nodeDep.getHeight() / 2);
@@ -103,6 +104,23 @@ public class Arc implements Serializable {
         pathMidX = (depX + movex)/2;
         pathMidY = (depY + movey)/2;
         this.path.quadTo(pathMidX,pathMidY,movex,movey);
+    }
+
+    /**
+     * Met à jour la courbure d'un arc
+     * @param movex la coordonnée x du doigt de l'utilisateur
+     * @param movey la coordonnée y du doigt de l'utilisateur
+     */
+    public void updateMidPath(int movex, int movey){
+        this.path = new Path();
+        int depX = nodeDep.getX() + (nodeDep.getWidth() / 2);
+        int depY = nodeDep.getY() + (nodeDep.getHeight() / 2);
+        this.path.moveTo(depX,depY);
+        int arrX = nodeArr.getX() + (nodeArr.getWidth() / 2);
+        int arrY = nodeArr.getY() + (nodeArr.getHeight() / 2);
+        pathMidX = movex;
+        pathMidY = movey;
+        this.path.quadTo(pathMidX,pathMidY,arrX,arrY);
     }
 
     /**
