@@ -105,7 +105,11 @@ public class DrawableGraph extends Drawable {
         Log.d("xxxxxmid1",""+midPoint[1]);
         Log.d("xxxxxtan0",""+tangent[0]);
         Log.d("xxxxxtan0",""+tangent[1]);
-        canvas.drawText(arc.getName(), midPoint[0], midPoint[1], arcNamePaint);
+        if(arc.getNodeDep() == arc.getNodeArr()){
+            canvas.drawText(arc.getName(), arc.getPathMidX(), arc.getPathMidY(), arcNamePaint);
+        }else{
+            canvas.drawText(arc.getName(), midPoint[0], midPoint[1], arcNamePaint);
+        }
     }
 
     @Override

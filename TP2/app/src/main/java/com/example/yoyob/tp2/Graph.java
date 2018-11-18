@@ -1,5 +1,8 @@
 package com.example.yoyob.tp2;
 
+import android.graphics.PathMeasure;
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -137,6 +140,12 @@ public class Graph implements Serializable {
         Arc selected = null;
         for (Arc a: arcs) {
             if(x > a.getPathMidX()-30 && x < a.getPathMidX()+30 && y > a.getPathMidY()-30 && y < a.getPathMidY()+30)
+                selected = a;
+            float[] midPoint = {0f, 0f};
+            float[] tangent = {0f, 0f};
+            PathMeasure pm = new PathMeasure(a.getPath(), false);
+            pm.getPosTan(pm.getLength() * 0.5f, midPoint, tangent);
+            if(x > midPoint[0]-30 && x < midPoint[0]+30 && y > midPoint[1]-30 && y < midPoint[1]+30)
                 selected = a;
         }
         return selected;
