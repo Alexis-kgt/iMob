@@ -96,7 +96,7 @@ public class DrawableGraph extends Drawable {
         canvas.drawPath(arc.getPath(),arcPaint);
         arcNamePaint.setColor(arc.getColor());
         arcNamePaint.setTextAlign(Paint.Align.CENTER);
-        arcNamePaint.setTextSize(arc.getNodeDep().getHeight() - arc.getNodeDep().getHeight()/3);
+        arcNamePaint.setTextSize(arc.getTextSize());
         float[] midPoint = {0f, 0f};
         float[] tangent = {0f, 0f};
         PathMeasure pm = new PathMeasure(arc.getPath(), false);

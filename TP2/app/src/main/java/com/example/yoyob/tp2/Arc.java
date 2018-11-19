@@ -1,10 +1,12 @@
 package com.example.yoyob.tp2;
 
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.Log;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 public class Arc implements Serializable {
 
@@ -15,7 +17,22 @@ public class Arc implements Serializable {
     private int pathMidX, pathMidY;
     private String name;
     private float width = 10f;
+    private float textSize = 40f;
 
+    private static HashMap<String,Integer> colors = new HashMap<String,Integer>();
+
+    /**
+     * Met en relation le texte d'une couleur avec sa valeur en Integer
+     */
+    static {
+        colors.put("Rouge",Color.RED);
+        colors.put("Vert",Color.GREEN);
+        colors.put("Bleu",Color.BLUE);
+        colors.put("Orange",Color.rgb(255,165,0));
+        colors.put("Cyan",Color.CYAN);
+        colors.put("Magenta",Color.MAGENTA);
+        colors.put("Noir",Color.BLACK);
+    }
 
     public Arc(){
 
@@ -60,6 +77,19 @@ public class Arc implements Serializable {
         this.nodeArr = nodeArr;
     }
 
+    /**
+     * @return la taille du texte
+     */
+    public float getTextSize() {
+        return textSize;
+    }
+
+    /**
+     * @param textSize la taille du texte
+     */
+    public void setTextSize(float textSize) {
+        this.textSize = textSize;
+    }
     /**
      * @return l'epaisseur de l'arc
      */
@@ -295,6 +325,13 @@ public class Arc implements Serializable {
      */
     public void setColor(int color){
         this.color = color;
+    }
+
+    /**
+     * @param color la couleur de l'arc en String
+     */
+    public void setColor(String color){
+        this.color = colors.get(color);
     }
 
     /**

@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     Node currentNode;
     Arc currentArc;
-    Arc arcToCurve;
+    Arc arcToCurveOrModify;
 
     int downx = 0, downy = 0, upx = 0, upy = 0;
 
@@ -102,13 +102,13 @@ public class MainActivity extends AppCompatActivity {
                         }
                         else if(graph.midArcSelected(downx,downy) != null){
                             Log.d("arcToCurve","arcToCurve");
-                            arcToCurve = graph.midArcSelected(downx,downy);
+                            arcToCurveOrModify = graph.midArcSelected(downx,downy);
                             currentNode = null;
                             currentArc = null;
                         }
                         // Sinon le noeud courant devient null
                         else {
-                            arcToCurve = null;
+                            arcToCurveOrModify = null;
                             currentNode = null;
                             currentArc = null;
                         }
@@ -136,9 +136,8 @@ public class MainActivity extends AppCompatActivity {
                                 if (currentArc != null)
                                     currentArc.updatePath(movex, movey);
                             }
-                        }else if(arcToCurve != null && rGroup.getCheckedRadioButtonId() == R.id.modificationRadioButton){
-                            Log.d("updatePath","hfbe");
-                            arcToCurve.updateMidPath(movex,movey);
+                        }else if(arcToCurveOrModify != null && rGroup.getCheckedRadioButtonId() == R.id.arcRadioButton){
+                            arcToCurveOrModify.updateMidPath(movex,movey);
                         }
                         //Mise à jour de l'écran
                         backgroundImageView.invalidate();
@@ -158,6 +157,11 @@ public class MainActivity extends AppCompatActivity {
                                 && rGroup.getCheckedRadioButtonId() == R.id.nodeRadioButton) {
                             createDialogNodeCreation(upx, upy);
 
+                        } else if (arcToCurveOrModify != null && (Math.abs(downx - upx) < 30)
+                                && (Math.abs(downy - upy) < 30)
+                                && System.currentTimeMillis() - touchStartTime > LONG_TOUCH_DURATION
+                                && rGroup.getCheckedRadioButtonId() == R.id.modificationRadioButton) {
+                            createDialogArcModif(arcToCurveOrModify);
                         } else {
                             //Si un arc a été créé, mais qu'il n'arrive pas sur un autre noeud, on le supprime
                             if (currentArc != null && graph.nodeSelected(upx, upy) == null && rGroup.getCheckedRadioButtonId() == R.id.arcRadioButton) {
@@ -211,6 +215,74 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
         AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
+    /**
+     * Créer une boite de dialogue pour la modification d'un arc
+     *
+     * @param arc le noeud en question
+     */
+    public void createDialogArcModif(final Arc arc) {
+        LayoutInflater li = LayoutInflater.from(context);
+        //Les différents champs "étiquette", "taille" et "couleur"
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        View v = li.inflate(R.layout.arc_modification, null);
+        final TextInputEditText etiquette = v.findViewById(R.id.etiquetteEditText);
+        etiquette.setText(arc.getName());
+        final TextInputEditText taille = v.findViewById(R.id.tailleEditText);
+        taille.setText("" + arc.getTextSize());
+        final TextInputEditText epaisseur = v.findViewById(R.id.widthEditText);
+        epaisseur.setText("" + arc.getWidth());
+        final Spinner color = v.findViewById(R.id.colorSpinner);
+        Button delButton = v.findViewById(R.id.delNodeButton);
+        alertDialogBuilder.setView(v);
+        alertDialogBuilder
+                .setCancelable(false)
+                //Validation des modifications
+                .setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                if ("" + etiquette.getText() != "")
+                                    arc.setName("" + etiquette.getText());
+                                boolean tailleInt, epaisseurInt;
+                                try{
+                                    Float.parseFloat("" + taille.getText());
+                                    tailleInt = true;
+                                }catch (Exception e){
+                                    tailleInt = false;
+                                }
+                                try{
+                                    Float.parseFloat("" + taille.getText());
+                                    epaisseurInt = true;
+                                }catch (Exception e){
+                                    epaisseurInt = false;
+                                }
+                                if ("" + epaisseur.getText() != "" && epaisseurInt)
+                                    arc.setWidth(Float.parseFloat("" + epaisseur.getText()));
+                                if ("" + taille.getText() != "" && tailleInt)
+                                    arc.setTextSize(Float.parseFloat("" + taille.getText()));
+                                arc.setColor("" + color.getSelectedItem().toString());
+                                backgroundImageView.invalidate();
+                            }
+                        })
+                //Annulation des modifications
+                .setNegativeButton("Annuler",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+        final AlertDialog alertDialog = alertDialogBuilder.create();
+
+        delButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                graph.removeArc(arc);
+                alertDialog.dismiss();
+                backgroundImageView.invalidate();
+            }
+        });
         alertDialog.show();
     }
 
