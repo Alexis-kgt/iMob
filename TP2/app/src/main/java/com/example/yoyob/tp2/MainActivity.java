@@ -1,14 +1,37 @@
 package com.example.yoyob.tp2;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.IntentSender;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.database.DatabaseErrorHandler;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.graphics.Path;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.UserHandle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -22,11 +45,15 @@ import android.widget.Spinner;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         //ImageView comportant le graphe
         backgroundImageView = findViewById(R.id.backgroundImageView);
 
@@ -78,6 +104,10 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+    }
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleHelper.onAttach(base));
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -208,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         })
                 //L'arc n'a pas d'étiquette
-                .setNegativeButton("Cancel",
+                .setNegativeButton(R.string.annuler,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
@@ -267,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         })
                 //Annulation des modifications
-                .setNegativeButton("Annuler",
+                .setNegativeButton(R.string.annuler,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
@@ -322,7 +352,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         })
                 //Annulation des modifications
-                .setNegativeButton("Annuler",
+                .setNegativeButton(R.string.annuler,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
@@ -371,7 +401,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         })
                 //Annulation des modifications
-                .setNegativeButton("Annuler",
+                .setNegativeButton(R.string.annuler,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
@@ -400,7 +430,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         })
                 //L'arc n'a pas d'étiquette
-                .setNegativeButton("Cancel",
+                .setNegativeButton(R.string.annuler,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
@@ -437,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         })
                 //L'arc n'a pas d'étiquette
-                .setNegativeButton("Cancel",
+                .setNegativeButton(R.string.annuler,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
@@ -445,6 +475,46 @@ public class MainActivity extends AppCompatActivity {
                         });
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
+    }
+    /**
+     * Créer une boite de dialogue pour changer le langage
+     */
+    public void createDialogChangerLangage(View v) {
+        LayoutInflater li = LayoutInflater.from(context);
+        View promptsView = li.inflate(R.layout.langage, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        alertDialogBuilder.setView(promptsView);
+        final Spinner langage = promptsView.findViewById(R.id.langageSpinner);
+        alertDialogBuilder
+                .setCancelable(false)
+                //Valider la sauvegarde
+                .setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                changerLangage(langage.getSelectedItem().toString());
+                            }
+                        })
+                //L'arc n'a pas d'étiquette
+                .setNegativeButton(R.string.annuler,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
+    public void changerLangage(String langage){
+        switch (langage){
+            case "Français":
+                context = LocaleHelper.setLocale(context,"fr");
+                break;
+            case "English":
+                context = LocaleHelper.setLocale(context,"en");
+                break;
+        }
+        this.recreate();
     }
 
     public void menuDisplay(View v) {
@@ -456,7 +526,7 @@ public class MainActivity extends AppCompatActivity {
         alertDialogBuilder
                 .setCancelable(false)
                 //Annulation
-                .setNegativeButton("Annuler",
+                .setNegativeButton(R.string.annuler,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();

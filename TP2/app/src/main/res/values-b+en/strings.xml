@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">GraphKR</string>
+    <string-array name="node_colors">
+        <item>Red</item>
+        <item>Green</item>
+        <item>Blue</item>
+        <item>Orange</item>
+        <item>Cyan</item>
+        <item>Magenta</item>
+        <item>Black</item>
+    </string-array>
+    <string-array name="langage">
+        <item>Français</item>
+        <item>English</item>
+    </string-array>
+    <string name="node">Node</string>
+    <string name="arc">Edge</string>
+    <string name="arcName">Edge name</string>
+    <string name="graphName">Graph name</string>
+    <string name="modification">Change</string>
+    <string name="etiquette">Label</string>
+    <string name="size">Size</string>
+    <string name="width">Width</string>
+    <string name="delete">Delete</string>
+    <string name="reset"> Reset</string>
+    <string name="save"> Save</string>
+    <string name="display"> Load</string>
+    <string name="send"> Send by mail</string>
+    <string name="langage">Language</string>
+    <string name="annuler">Cancel</string>
+</resources>
