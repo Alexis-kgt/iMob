@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -19,6 +20,7 @@ import android.content.res.Resources;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -26,6 +28,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.os.Environment;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -42,6 +45,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,6 +56,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
@@ -62,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView backgroundImageView;
     RadioGroup rGroup;
     Graph graph;
+    Bitmap myBitmap;
 
     int largeur, hauteur;
 
@@ -80,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         //ImageView comportant le graphe
         backgroundImageView = findViewById(R.id.backgroundImageView);
 
@@ -677,4 +684,63 @@ public class MainActivity extends AppCompatActivity {
             Log.e("load", e.toString());
         }
     }
+
+    public void envoyerGraphe(View v){
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("vnd.android.cursor.dir/email");
+
+        Bitmap screen = takeScreenShot(v);
+        String path = saveToInternalStorage(screen);
+
+        Log.d("aaaafd", getFilesDir().getPath());
+        Log.d("aaaafd", path);
+
+        i.putExtra(Intent.EXTRA_EMAIL  , new String[]{""});
+        i.putExtra(Intent.EXTRA_SUBJECT, "Graphe");
+        i.putExtra(Intent.EXTRA_STREAM   , Uri.parse(path+"/graphCapture.jpg"));
+
+        try {
+            startActivity(Intent.createChooser(i, "Send mail..."));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(MainActivity.this, "Aucune appli de messagerie installée.", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    private String saveToInternalStorage(Bitmap bitmapImage){
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        File mypath=new File(directory,"graphCapture.jpg");
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(mypath);
+            // Use the compress method on the BitMap object to write image to the OutputStream
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return directory.getAbsolutePath();
+    }
+
+    public Bitmap takeScreenShot(View view) {
+        view.setDrawingCacheEnabled(true);
+        view.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+        view.buildDrawingCache();
+
+        if(view.getDrawingCache() == null) return null;
+
+        Bitmap snapshot = Bitmap.createBitmap(view.getDrawingCache());
+        view.setDrawingCacheEnabled(false);
+        view.destroyDrawingCache();
+
+        return snapshot;
+    }
+
 }
