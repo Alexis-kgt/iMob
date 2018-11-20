@@ -176,17 +176,38 @@ public class DrawableGraph extends Drawable {
                 }
             }
         }
-        if(arc.getNodeArr() != null && (arc.getNodeDep() != arc.getNodeArr())){
+        if(arc.getNodeArr() != null){
             Path edgePath = new Path();
             edgePath.moveTo(pointDepPrecis[0],pointDepPrecis[1]);
-            edgePath.quadTo(arc.getPathMidX(),arc.getPathMidY(),pointArrPrecis[0],pointArrPrecis[1]);
-            canvas.drawPath(edgePath,arcPaint);
-        }else if(arc.getNodeDep() == arc.getNodeArr()){
-            Path edgePath = new Path();
-            edgePath.moveTo(pointDepPrecis[0],pointDepPrecis[1]);
-            edgePath.quadTo(pointDepPrecis[0]+(arc.getPathMidX()-pointDepPrecis[0]), pointDepPrecis[1], arc.getPathMidX(), arc.getPathMidY());
-            edgePath.moveTo(arc.getPathMidX(), arc.getPathMidY());
-            edgePath.quadTo(pointDepPrecis[0], pointDepPrecis[1]+(arc.getPathMidY()-pointDepPrecis[1]), pointDepPrecis[0], pointDepPrecis[1]);
+            if(arc.getNodeDep() != arc.getNodeArr()){
+                edgePath.quadTo(arc.getPathMidX(),arc.getPathMidY(),pointArrPrecis[0],pointArrPrecis[1]);
+            }else {
+                edgePath.quadTo(pointDepPrecis[0]+(arc.getPathMidX()-pointDepPrecis[0]), pointDepPrecis[1], arc.getPathMidX(), arc.getPathMidY());
+                edgePath.moveTo(arc.getPathMidX(), arc.getPathMidY());
+                edgePath.quadTo(pointDepPrecis[0], pointDepPrecis[1]+(arc.getPathMidY()-pointDepPrecis[1]), pointDepPrecis[0], pointDepPrecis[1]);
+            }
+            float x1 = pointArrPrecis[0];
+            float y1 = pointArrPrecis[1];
+            float x0 = arc.getPathMidX();
+            float y0 = arc.getPathMidY();
+            float deltaX = x1 - x0;
+            float deltaY = y1 - y0;
+            float frac = (float) 0.1;
+
+            float point_x_1 = x0 + ((1 - frac) * deltaX + frac * deltaY);
+            float point_y_1 = y0 + ((1 - frac) * deltaY - frac * deltaX);
+
+            float point_x_2 = x1;
+            float point_y_2 = y1;
+
+            float point_x_3 = x0 + ((1 - frac) * deltaX - frac * deltaY);
+            float point_y_3 = y0 + ((1 - frac) * deltaY + frac * deltaX);
+
+            edgePath.moveTo(point_x_1, point_y_1);
+            edgePath.lineTo(point_x_2, point_y_2);
+            edgePath.moveTo(point_x_3, point_y_3);
+            edgePath.lineTo(point_x_2, point_y_2);
+            edgePath.close();
             canvas.drawPath(edgePath,arcPaint);
         }
         else{
