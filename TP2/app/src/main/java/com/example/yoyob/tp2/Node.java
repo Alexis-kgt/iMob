@@ -3,6 +3,7 @@ package com.example.yoyob.tp2;
 import android.graphics.Color;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Node implements Serializable {

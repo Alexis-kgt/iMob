@@ -1,7 +1,9 @@
 package com.example.yoyob.tp2;
 
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Path;
+import android.util.Log;
 
 import java.io.Serializable;
 import java.util.HashMap;

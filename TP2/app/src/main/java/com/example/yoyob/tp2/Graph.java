@@ -1,6 +1,7 @@
 package com.example.yoyob.tp2;
 
 import android.graphics.PathMeasure;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Iterator;
