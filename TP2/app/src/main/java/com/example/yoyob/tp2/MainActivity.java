@@ -1,40 +1,22 @@
 package com.example.yoyob.tp2;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.IntentSender;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.database.DatabaseErrorHandler;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Path;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.UserHandle;
 import android.os.Environment;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -46,19 +28,15 @@ import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
-
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -67,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
     ImageView backgroundImageView;
     RadioGroup rGroup;
     Graph graph;
-    Bitmap myBitmap;
 
     int largeur, hauteur;
 
@@ -111,6 +88,20 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        if (Build.VERSION.SDK_INT >= 23) {
+
+            ActivityCompat.requestPermissions(this, new String[] {
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE },
+                    10);
+        }
+
     }
     @Override
     protected void attachBaseContext(Context base) {
@@ -584,22 +575,18 @@ public class MainActivity extends AppCompatActivity {
         String graphSave = "";
         for(Node n : graph.getNodes()){
             graphSave += "NODE#_#_#_#_#id="+n.getId()+"/x="+n.getX()+"/y="+n.getY()+"/etiquette="+n.getEtiquette()+"/color="+n.getColor()+"/width="+n.getWidth()+"/height="+n.getHeight()+"_é_è_é_è_";
-            Log.d("graphSaveNode",graphSave);
         }
         for(Arc a : graph.getArcs()){
             if(a.getNodeDep() != null && a.getNodeArr() != null){
                 graphSave += "ARC#_#_#_#_#id="+a.getId()+"/idNodeDep="+a.getNodeDep().getId()+"/idNodeArr="+a.getNodeArr().getId()+"/color="+a.getColor()+"/name="+a.getName()+"/width="+a.getWidth()+"/pathMidX="+a.getPathMidX()+"/pathMidY="+a.getPathMidY()+"_é_è_é_è_";
             }
-            Log.d("graphSaveArc",graphSave);
         }
-        Log.d("graphSave",graphSave);
         try {
             FileOutputStream fos = context.openFileOutput(nomGraph, Context.MODE_PRIVATE);
             ObjectOutputStream os = new ObjectOutputStream(fos);
             os.writeObject(graphSave);
             os.close();
             fos.close();
-            Log.d("blaaa", getFilesDir().getPath());
         } catch (Exception e) {
             Log.e("save", e.toString());
         }
@@ -616,12 +603,10 @@ public class MainActivity extends AppCompatActivity {
             String graphString = (String) is.readObject();
             is.close();
             fis.close();
-            Log.d("graphString", graphString);
             graph.setArcs(new ArrayList<Arc>());
             graph.setNodes(new ArrayList<Node>());
             for(String object : graphString.split("_é_è_é_è_")){
                 String type = object.split("#_#_#_#_#")[0];
-                Log.d("graphStringObject", object);
                 String values = object.split("#_#_#_#_#")[1];
                 if(type.contains("NODE")){
                     Node n = new Node();
@@ -653,7 +638,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                     graph.AddNode(n);
                 }else if(type.contains("ARC")){
-                    Log.d("graphStringObject", "new arc");
                     Arc a = new Arc();
                     int midX = 0, midY = 0;
                     Node nodeDep = new Node(), nodeArr = new Node();
@@ -667,8 +651,6 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             case "idNodeDep":
                                 for(Node n : graph.getNodes()){
-                                    Log.d("graphStringObject", ""+n.getId());
-                                    Log.d("graphStringObject", ""+Integer.parseInt(val));
                                     if(n.getId() == Integer.parseInt(val)){
                                         a.setNodeDep(n);
                                     }
@@ -676,8 +658,6 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             case "idNodeArr":
                                 for(Node n : graph.getNodes()){
-                                    Log.d("graphStringObject", ""+n.getId());
-                                    Log.d("graphStringObject", ""+Integer.parseInt(val));
                                     if(n.getId() == Integer.parseInt(val)){
                                         a.setNodeArr(n);
                                     }
@@ -709,21 +689,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Fonction permettant d'envoyer le graphe courant par mail
+     * Envoyer une capture d'écran dans le corps d'un message
+     *
      */
+
     public void envoyerGraphe(View v){
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType("vnd.android.cursor.dir/email");
 
-        Bitmap screen = takeScreenShot(v);
-        String path = saveToInternalStorage(screen);
-
-        Log.d("aaaafd", getFilesDir().getPath());
-        Log.d("aaaafd", path);
+        File f = takeScreenshot(v);
 
         i.putExtra(Intent.EXTRA_EMAIL  , new String[]{""});
         i.putExtra(Intent.EXTRA_SUBJECT, "Graphe");
-        i.putExtra(Intent.EXTRA_STREAM   , Uri.parse(path+"/graphCapture.jpg"));
+        i.putExtra(Intent.EXTRA_STREAM   , f);
 
         try {
             startActivity(Intent.createChooser(i, "Send mail..."));
@@ -733,40 +711,48 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private String saveToInternalStorage(Bitmap bitmapImage){
-        ContextWrapper cw = new ContextWrapper(getApplicationContext());
-        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        File mypath=new File(directory,"graphCapture.jpg");
+    /**
+     * Prend une capture
+     *
+     */
+    public File takeScreenshot(View v) {
 
-        FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream(mypath);
-            // Use the compress method on the BitMap object to write image to the OutputStream
-            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                    checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+
+                Date now = new Date();
+                DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
+                // image naming and path  to include sd card  appending name you choose for file
+                // create bitmap screen capture
+                View v1 = findViewById(android.R.id.content).getRootView();
+                v1.setDrawingCacheEnabled(true);
+                //Bitmap bitmap = Bitmap.createBitmap(v1.getWidth(),v1.getHeight(), Bitmap.Config.ARGB_8888);
+                Bitmap bitmap = v1.getDrawingCache();
+
+                int quality = 100;
+
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+                File imageFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),now.toString() + ".jpg");
+                FileOutputStream outputStream = new FileOutputStream(imageFile);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
+                outputStream.flush();
+
+                outputStream.close();
+                //MediaStore.Images.Media.insertImage( getContentResolver(), bitmap,now.toString(), "screen");
+                return imageFile;
             }
+        } catch (Throwable e) {
+            // Several error may come out with file handling or DOM
+            e.printStackTrace();
         }
-        return directory.getAbsolutePath();
+
+
+        return null;
+
     }
 
-    public Bitmap takeScreenShot(View view) {
-        view.setDrawingCacheEnabled(true);
-        view.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
-        view.buildDrawingCache();
-
-        if(view.getDrawingCache() == null) return null;
-
-        Bitmap snapshot = Bitmap.createBitmap(view.getDrawingCache());
-        view.setDrawingCacheEnabled(false);
-        view.destroyDrawingCache();
-
-        return snapshot;
-    }
 
 }
