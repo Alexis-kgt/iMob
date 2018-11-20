@@ -137,13 +137,14 @@ public class MainActivity extends AppCompatActivity {
                             currentArc.setNodeDep(currentNode);
                             graph.addArc(currentArc);
                         }
+                        //Si l'utilisateur pose son doigt sur le milieu d'un arc
                         else if(graph.midArcSelected(downx,downy) != null){
-                            Log.d("arcToCurve","arcToCurve");
+                            //On récupère l'arc en question
                             arcToCurveOrModify = graph.midArcSelected(downx,downy);
                             currentNode = null;
                             currentArc = null;
                         }
-                        // Sinon le noeud courant devient null
+                        // Sinon le noeud courant, l'arc courant ou l'arc à modifier deviennent null
                         else {
                             arcToCurveOrModify = null;
                             currentNode = null;
@@ -173,7 +174,9 @@ public class MainActivity extends AppCompatActivity {
                                 if (currentArc != null)
                                     currentArc.updatePath(movex, movey);
                             }
+                        //Si l'utilisateur a sélectionné un arc du graphe
                         }else if(arcToCurveOrModify != null && rGroup.getCheckedRadioButtonId() == R.id.arcRadioButton){
+                            //On modifie le milieu de l'arc en question
                             arcToCurveOrModify.updateMidPath(movex,movey);
                         }
                         //Mise à jour de l'écran
@@ -190,11 +193,13 @@ public class MainActivity extends AppCompatActivity {
                                 && System.currentTimeMillis() - touchStartTime > LONG_TOUCH_DURATION
                                 && rGroup.getCheckedRadioButtonId() == R.id.modificationRadioButton) {
                             createDialogNodeModif(currentNode);
+                        //Si le mode est noeud, que l'utilisateur a fait un long click et qu'il n'a pas sélectionné de noeud
                         } else if (currentNode == null && System.currentTimeMillis() - touchStartTime > LONG_TOUCH_DURATION
                                 && rGroup.getCheckedRadioButtonId() == R.id.nodeRadioButton) {
                             createDialogNodeCreation(upx, upy);
-
-                        } else if (arcToCurveOrModify != null && (Math.abs(downx - upx) < 30)
+                        }
+                        //Si l'utilisateur a fait un long click sur un arc existant
+                        else if (arcToCurveOrModify != null && (Math.abs(downx - upx) < 30)
                                 && (Math.abs(downy - upy) < 30)
                                 && System.currentTimeMillis() - touchStartTime > LONG_TOUCH_DURATION
                                 && rGroup.getCheckedRadioButtonId() == R.id.modificationRadioButton) {
@@ -378,6 +383,12 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    /**
+     * Créer une boite de dialogue pour la création d'un noeud
+     *
+     * @param upx la coordonnée x de l'endroit où sera ajouté le noeud
+     * @param upy la coordonnée y de l'endroit où sera ajouté le noeud
+     */
     public void createDialogNodeCreation(final int upx, final int upy) {
         LayoutInflater li = LayoutInflater.from(context);
         //Les différents champs "étiquette", "taille" et "couleur"
@@ -417,9 +428,9 @@ public class MainActivity extends AppCompatActivity {
         final AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
+
     /**
-     * Créer une boite de dialogue pour renseigner le nom du graphe
-     *
+     * Créer une boite de dialogue pour renseigner le nom du graphe lors de la sauvegarde
      */
     public void createDialogGraphName(View v) {
         LayoutInflater li = LayoutInflater.from(context);
@@ -446,9 +457,9 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
+
     /**
-     * Créer une boite de dialogue pour charger un graphe
-     *
+     * Créer une boite de dialogue pour charger un graphe qui a été sauvegarder
      */
     public void createDialogChargerGraph(View v) {
         LayoutInflater li = LayoutInflater.from(context);
@@ -483,6 +494,7 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
+
     /**
      * Créer une boite de dialogue pour changer le langage
      */
@@ -512,6 +524,10 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    /**
+     * Fonction permettant de changer le langage de l'application
+     * @param langage le langage sélectionné
+     */
     public void changerLangage(String langage){
         switch (langage){
             case "Français":
@@ -524,9 +540,11 @@ public class MainActivity extends AppCompatActivity {
         this.recreate();
     }
 
+    /**
+     * Fonction permettant d'afficher le menu de l'application
+     */
     public void menuDisplay(View v) {
         LayoutInflater li = LayoutInflater.from(context);
-        //Les différents champs "étiquette", "taille" et "couleur"
         final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
         View v2 = li.inflate(R.layout.menu, null);
         alertDialogBuilder.setView(v2);
@@ -543,6 +561,9 @@ public class MainActivity extends AppCompatActivity {
         menuDialog.show();
     }
 
+    /**
+     * Fonction permettant de réinitialiser le graphe
+     */
     public void reinitialiserGraphe(View v) {
         graph.setNodes(new ArrayList<Node>());
         graph.setArcs(new ArrayList<Arc>());
@@ -555,6 +576,10 @@ public class MainActivity extends AppCompatActivity {
         menuDialog.dismiss();
     }
 
+    /**
+     * Fonction permettant de sauvegarder le graphe
+     * @param nomGraph le nom du graphe
+     */
     public void sauvegarderGraphe(String nomGraph) {
         String graphSave = "";
         for(Node n : graph.getNodes()){
@@ -580,6 +605,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Fonction permettant de charger un graphe
+     * @param graphName le nom du graphe
+     */
     public void chargerGraphe(String graphName) {
         try {
             FileInputStream fis = context.openFileInput(graphName);
@@ -685,6 +714,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Fonction permettant d'envoyer le graphe courant par mail
+     */
     public void envoyerGraphe(View v){
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType("vnd.android.cursor.dir/email");

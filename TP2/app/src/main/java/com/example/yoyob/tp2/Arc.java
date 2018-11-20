@@ -108,29 +108,29 @@ public class Arc implements Serializable {
      * Met à jour l'objet Path en fonction de la position des noeuds
      */
     public void updatePath(){
+        //Si l'arc relie bien deux noeud
         if(nodeArr != null){
-            Log.d("boucle","boucle");
+            //Si l'arc est une boucle
             if(nodeDep == nodeArr){
-                Log.d("boucle","oui");
-                Log.d("boucleMidX",pathMidX+"");
-                Log.d("boucleMidY",pathMidY+"");
                 this.path = new Path();
+                //Les coordonées du milieu du noeud de départ
                 int x = nodeDep.getX()+ (nodeDep.getWidth() / 2);
                 int y = nodeDep.getY()+ (nodeDep.getHeight() / 2);
+                //Si l'arc est plus petit que le noeud, on donne des valeurs par défaut
                 if((pathMidX == 0 && pathMidY == 0)
                     ||((pathMidX < nodeDep.getX() + nodeDep.getWidth() && pathMidX > nodeDep.getX())
                         && (pathMidY < nodeDep.getY() + nodeDep.getHeight() && pathMidY > nodeDep.getY()))) {
                     pathMidX = x + 150;
                     pathMidY = y + 150;
                 }
+                //Création de la boucle
                 this.path.moveTo(x, y);
                 this.path.quadTo(x+(pathMidX-x), y, pathMidX, pathMidY);
                 this.path.moveTo(pathMidX, pathMidY);
                 this.path.quadTo(x, y+(pathMidY-y), x, y);
-                Log.d("boucleMidX",pathMidX+"");
-                Log.d("boucleMidY",pathMidY+"");
-            }else{
-                Log.d("boucle","non");
+            }
+            //Si l'arc n'est pas une boucle
+            else{
                 this.path = new Path();
                 int depX = nodeDep.getX() + (nodeDep.getWidth() / 2);
                 int depY = nodeDep.getY() + (nodeDep.getHeight() / 2);
@@ -148,7 +148,6 @@ public class Arc implements Serializable {
      * @param movey la coordonnée y du doigt de l'utilisateur
      */
     public void updatePath(int movex, int movey){
-        Log.d("boucle","move");
         this.path = new Path();
         int depX = nodeDep.getX() + (nodeDep.getWidth() / 2);
         int depY = nodeDep.getY() + (nodeDep.getHeight() / 2);
@@ -165,46 +164,40 @@ public class Arc implements Serializable {
      */
     public void updateMidPath(int movex, int movey){
         this.path = new Path();
+        //Les coordonées du milieu du noeud de départ
         int depX = nodeDep.getX() + (nodeDep.getWidth() / 2);
         int depY = nodeDep.getY() + (nodeDep.getHeight() / 2);
         this.path.moveTo(depX,depY);
+        //Les coordonées du milieu du noeud d'arrivée
         int arrX = nodeArr.getX() + (nodeArr.getWidth() / 2);
         int arrY = nodeArr.getY() + (nodeArr.getHeight() / 2);
+        //Si l'arc est une boucle
         if(nodeDep == nodeArr){
             this.path = new Path();
-            int x = nodeDep.getX()+ (nodeDep.getWidth() / 2);
-            int y = nodeDep.getY()+ (nodeDep.getHeight() / 2);
             if((movex < nodeDep.getX() + nodeDep.getWidth() && movex > nodeDep.getX())
                     && (movey < nodeDep.getY() + nodeDep.getHeight() && movey > nodeDep.getY())){
-                Log.d("coordXmin",nodeDep.getX() - nodeDep.getWidth()/2+"");
-                Log.d("coordXmax",nodeDep.getX() + nodeDep.getWidth()/2+"");
-                Log.d("coordYmin",nodeDep.getY() - nodeDep.getHeight()/2+"");
-                Log.d("coordYmax",nodeDep.getY() + nodeDep.getHeight()/2+"");
-                Log.d("coordY",movex+"");
-                Log.d("coordY",movey+"");
-                pathMidX = x + 150;
-                pathMidY = y + 150;
+                pathMidX = depX + 150;
+                pathMidY = depY + 150;
             }else{
                 pathMidX = movex;
                 pathMidY = movey;
             }
-            this.path.moveTo(x, y);
-            this.path.quadTo(x+(pathMidX-x), y, pathMidX, pathMidY);
+            this.path.moveTo(depX, depY);
+            this.path.quadTo(depX+(pathMidX-depX), depY, pathMidX, pathMidY);
             this.path.moveTo(pathMidX, pathMidY);
-            this.path.quadTo(x, y+(pathMidY-y), x, y);
-        }else{
-            Log.d("distanceArrY",arrY+"");
-            Log.d("distanceArrX",arrX+"");
-            Log.d("distanceDepY",depY+"");
-            Log.d("distanceDepX",depX+"");
-            Log.d("distanceMoveY",movey+"");
-            Log.d("distanceMoveX",movex+"");
+            this.path.quadTo(depX, depY+(pathMidY-depY), depX, depY);
+        }
+        //Si l'arc n'est pas une boucle
+        else{
+            //Conversion des coordonées de int en double;
             double arrYdouble = arrY;
             double arrXdouble = arrX;
             double depYdouble = depY;
             double depXdouble = depX;
+            //Equation de la droite passant par les deux noeuds de la forme y = mx+p
             double droiteEqM = (arrYdouble-depYdouble)/(arrXdouble-depXdouble);
             double droiteEqP = arrY-droiteEqM*arrX;
+            //Cas où l'arc est vertical
             if(droiteEqM == Double.POSITIVE_INFINITY){
                 droiteEqM = 9999999999.0;
             }else if(droiteEqM == Double.NEGATIVE_INFINITY){
@@ -215,35 +208,38 @@ public class Arc implements Serializable {
             }else if(droiteEqP == Double.NEGATIVE_INFINITY){
                 droiteEqP = -9999999999.0;
             }
-            Log.d("distanceM",droiteEqM+"");
-            Log.d("distanceP",droiteEqP+"");
+            //Distance du doigt par rapport à la droite passant par les deux noeuds
             double distance = Math.abs(movey-(droiteEqM*movex)-droiteEqP)/Math.sqrt(1.0+(droiteEqM*droiteEqM));
-            Log.d("distanceArc",distance+"");
+            //Equation de la perpendiculaire à la droite passant par les deux noeuds de la forme y = mx+p
             double perpenEqM = (1.0/droiteEqM)*-1.0;
             if(droiteEqM == 9999999999.0 || droiteEqM == -9999999999.0)
                 perpenEqM = 0;
             double perpenEqP = ((depYdouble + arrYdouble)/2)-perpenEqM*((depXdouble + arrXdouble)/2);
-            Log.d("distanceM",perpenEqM+"");
-            Log.d("distanceP",perpenEqP+"");
+            //Permet d'obtenir une valeur indiquant le sens de l'arc
             double sens = movey-(droiteEqM*movex)-droiteEqP;
+            //Coordonnées du milieu de l'arc
             int tmpMidX = (depX + arrX)/2, tmpMidY = (depY + arrY)/2;
+            //Permet de savoir dans quel sens incrémenter x pour obtenir le milieu de l'arc qui sera à la même distance que le doigt
             boolean xIncrement;
             if((perpenEqM > 0 && sens > 0) || (perpenEqM < 0 && sens < 0))
                 xIncrement = true;
             else
                 xIncrement = false;
             double tmpDistance = 0;
+            //Tant que la distance entre la droite des noeuds et le milieu est inférieure à celle entre le doigt et la droite des noeud, incrémenter (ou décrémenter) x
             while(tmpDistance < distance){
+                //Cas ou l'arc est vertical
                 if(perpenEqM == 0.0){
                     tmpMidX = movex;
                     break;
-                }if(droiteEqM == 0.0){
+                }
+                //Cas ou l'arc est horizontal
+                if(droiteEqM == 0.0){
                     tmpMidY = movey;
                     break;
                 }
+                //Autres cas
                 else{
-                    Log.d("distanceTmp",tmpDistance+"");
-                    Log.d("distanceDis",distance+"");
                     tmpDistance = Math.abs(tmpMidY-(droiteEqM*tmpMidX)-droiteEqP)/Math.sqrt(1.0+(droiteEqM*droiteEqM));
                     if(xIncrement)
                         tmpMidX++;

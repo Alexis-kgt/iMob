@@ -136,12 +136,20 @@ public class DrawableGraph extends Drawable {
                 d = regionArr.contains((int) pointArr[0], (int) pointArr[1]);
             }
         }
-        if(arc.getNodeArr() != null){
+        if(arc.getNodeArr() != null && (arc.getNodeDep() != arc.getNodeArr())){
             Path edgePath = new Path();
             edgePath.moveTo(pointDep[0],pointDep[1]);
             edgePath.quadTo(arc.getPathMidX(),arc.getPathMidY(),pointArr[0],pointArr[1]);
             canvas.drawPath(edgePath,arcPaint);
-        }else{
+        }else if(arc.getNodeDep() == arc.getNodeArr()){
+            Path edgePath = new Path();
+            edgePath.moveTo(pointDep[0],pointDep[1]);
+            edgePath.quadTo(pointDep[0]+(arc.getPathMidY()-pointDep[0]), pointDep[1], arc.getPathMidX(), arc.getPathMidY());
+            edgePath.moveTo(arc.getPathMidX(), arc.getPathMidY());
+            edgePath.quadTo(pointDep[0], pointDep[1]+(arc.getPathMidY()-pointDep[1]), pointDep[0], pointDep[1]);
+            canvas.drawPath(edgePath,arcPaint);
+        }
+        else{
             canvas.drawPath(arc.getPath(),arcPaint);
         }
     }
