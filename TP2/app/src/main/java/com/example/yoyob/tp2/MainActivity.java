@@ -127,8 +127,6 @@ public class MainActivity extends AppCompatActivity {
                             Manifest.permission.READ_EXTERNAL_STORAGE,
                             Manifest.permission.WRITE_EXTERNAL_STORAGE },
                     10);
-
-            Log.d("taaaaa","demande permission");
         }
 
     }
@@ -607,22 +605,18 @@ public class MainActivity extends AppCompatActivity {
         String graphSave = "";
         for(Node n : graph.getNodes()){
             graphSave += "NODE#_#_#_#_#id="+n.getId()+"/x="+n.getX()+"/y="+n.getY()+"/etiquette="+n.getEtiquette()+"/color="+n.getColor()+"/width="+n.getWidth()+"/height="+n.getHeight()+"_é_è_é_è_";
-            Log.d("graphSaveNode",graphSave);
         }
         for(Arc a : graph.getArcs()){
             if(a.getNodeDep() != null && a.getNodeArr() != null){
                 graphSave += "ARC#_#_#_#_#id="+a.getId()+"/idNodeDep="+a.getNodeDep().getId()+"/idNodeArr="+a.getNodeArr().getId()+"/color="+a.getColor()+"/name="+a.getName()+"/width="+a.getWidth()+"/pathMidX="+a.getPathMidX()+"/pathMidY="+a.getPathMidY()+"_é_è_é_è_";
             }
-            Log.d("graphSaveArc",graphSave);
         }
-        Log.d("graphSave",graphSave);
         try {
             FileOutputStream fos = context.openFileOutput(nomGraph, Context.MODE_PRIVATE);
             ObjectOutputStream os = new ObjectOutputStream(fos);
             os.writeObject(graphSave);
             os.close();
             fos.close();
-            Log.d("blaaa", getFilesDir().getPath());
         } catch (Exception e) {
             Log.e("save", e.toString());
         }
@@ -639,12 +633,10 @@ public class MainActivity extends AppCompatActivity {
             String graphString = (String) is.readObject();
             is.close();
             fis.close();
-            Log.d("graphString", graphString);
             graph.setArcs(new ArrayList<Arc>());
             graph.setNodes(new ArrayList<Node>());
             for(String object : graphString.split("_é_è_é_è_")){
                 String type = object.split("#_#_#_#_#")[0];
-                Log.d("graphStringObject", object);
                 String values = object.split("#_#_#_#_#")[1];
                 if(type.contains("NODE")){
                     Node n = new Node();
@@ -676,7 +668,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                     graph.AddNode(n);
                 }else if(type.contains("ARC")){
-                    Log.d("graphStringObject", "new arc");
                     Arc a = new Arc();
                     int midX = 0, midY = 0;
                     Node nodeDep = new Node(), nodeArr = new Node();
@@ -690,8 +681,6 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             case "idNodeDep":
                                 for(Node n : graph.getNodes()){
-                                    Log.d("graphStringObject", ""+n.getId());
-                                    Log.d("graphStringObject", ""+Integer.parseInt(val));
                                     if(n.getId() == Integer.parseInt(val)){
                                         a.setNodeDep(n);
                                     }
@@ -699,8 +688,6 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             case "idNodeArr":
                                 for(Node n : graph.getNodes()){
-                                    Log.d("graphStringObject", ""+n.getId());
-                                    Log.d("graphStringObject", ""+Integer.parseInt(val));
                                     if(n.getId() == Integer.parseInt(val)){
                                         a.setNodeArr(n);
                                     }
@@ -747,7 +734,6 @@ public class MainActivity extends AppCompatActivity {
                 DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
                 // image naming and path  to include sd card  appending name you choose for file
                 String mPath = Environment.getExternalStorageDirectory().toString() + "/" + now + ".jpg";
-                Log.d("urii",mPath);
                 // create bitmap screen capture
                 View v1 = getWindow().getDecorView().getRootView();
                 v1.setDrawingCacheEnabled(true);
@@ -767,13 +753,9 @@ public class MainActivity extends AppCompatActivity {
                 outputStream.flush();
                 outputStream.close();
 
-                Log.d("vvvvvvv","5");
-
                 Uri path = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".com.example.yoyob.tp2.GenericFileProvider", imageFile);
 
                 Intent emailIntent = new Intent(Intent.ACTION_SEND);
-
-                Log.d("vvvvvvv","6");
 
                 emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 emailIntent .setType("vnd.android.cursor.dir/email");
@@ -782,12 +764,10 @@ public class MainActivity extends AppCompatActivity {
 
                 emailIntent .putExtra(Intent.EXTRA_STREAM, path);
 
-                emailIntent .putExtra(Intent.EXTRA_SUBJECT, "Sujet");
-                Log.d("vvvvvvv","7");
+                emailIntent .putExtra(Intent.EXTRA_SUBJECT, "Screenshot "+now);
 
                 startActivity(Intent.createChooser(emailIntent , "Send email..."));
 
-                Log.d("vvvvvvv","8");
 
 
             }

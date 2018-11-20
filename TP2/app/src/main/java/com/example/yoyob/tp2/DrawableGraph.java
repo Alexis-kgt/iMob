@@ -93,7 +93,6 @@ public class DrawableGraph extends Drawable {
         arcPaint.setStyle(Paint.Style.STROKE);
         arcPaint.setStrokeJoin(Paint.Join.ROUND);
         arcPaint.setStrokeWidth(arc.getWidth());
-        Log.d("updatePath",arc.getPathMidX()+" / "+arc.getPathMidY());
         arcNamePaint.setColor(arc.getColor());
         arcNamePaint.setTextAlign(Paint.Align.CENTER);
         arcNamePaint.setTextSize(arc.getTextSize());
