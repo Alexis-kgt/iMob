@@ -1,5 +1,6 @@
 package com.example.yoyob.tp2;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -30,9 +31,12 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.os.Environment;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -112,6 +116,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        if (Build.VERSION.SDK_INT >= 23) {
+
+            ActivityCompat.requestPermissions(this, new String[] {
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE },
+                    10);
+
+            Log.d("taaaaa","demande permission");
+        }
+
+    }
+
+
+
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(LocaleHelper.onAttach(base));
@@ -709,64 +732,71 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Fonction permettant d'envoyer le graphe courant par mail
+     * Envoyer une capture d'écran dans le corps d'un message
+     *
      */
+
     public void envoyerGraphe(View v){
-        Intent i = new Intent(Intent.ACTION_SEND);
-        i.setType("vnd.android.cursor.dir/email");
-
-        Bitmap screen = takeScreenShot(v);
-        String path = saveToInternalStorage(screen);
-
-        Log.d("aaaafd", getFilesDir().getPath());
-        Log.d("aaaafd", path);
-
-        i.putExtra(Intent.EXTRA_EMAIL  , new String[]{""});
-        i.putExtra(Intent.EXTRA_SUBJECT, "Graphe");
-        i.putExtra(Intent.EXTRA_STREAM   , Uri.parse(path+"/graphCapture.jpg"));
 
         try {
-            startActivity(Intent.createChooser(i, "Send mail..."));
-        } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(MainActivity.this, "Aucune appli de messagerie installée.", Toast.LENGTH_SHORT).show();
-        }
 
-    }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                    checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 
-    private String saveToInternalStorage(Bitmap bitmapImage){
-        ContextWrapper cw = new ContextWrapper(getApplicationContext());
-        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        File mypath=new File(directory,"graphCapture.jpg");
+                Date now = new Date();
+                DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
+                // image naming and path  to include sd card  appending name you choose for file
+                String mPath = Environment.getExternalStorageDirectory().toString() + "/" + now + ".jpg";
+                Log.d("urii",mPath);
+                // create bitmap screen capture
+                View v1 = getWindow().getDecorView().getRootView();
+                v1.setDrawingCacheEnabled(true);
+                Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache());
+                v1.setDrawingCacheEnabled(false);
 
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(mypath);
-            // Use the compress method on the BitMap object to write image to the OutputStream
-            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+
+
+                File imageFile = new File(mPath);
+                FileOutputStream outputStream = new FileOutputStream(imageFile);
+
+
+
+                int quality = 100;
+
+                bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
+                outputStream.flush();
+                outputStream.close();
+
+                Log.d("vvvvvvv","5");
+
+                Uri path = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".com.example.yoyob.tp2.GenericFileProvider", imageFile);
+
+                Intent emailIntent = new Intent(Intent.ACTION_SEND);
+
+                Log.d("vvvvvvv","6");
+
+                emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                emailIntent .setType("vnd.android.cursor.dir/email");
+                String to[] = {};
+                emailIntent .putExtra(Intent.EXTRA_EMAIL, to);
+
+                emailIntent .putExtra(Intent.EXTRA_STREAM, path);
+
+                emailIntent .putExtra(Intent.EXTRA_SUBJECT, "Sujet");
+                Log.d("vvvvvvv","7");
+
+                startActivity(Intent.createChooser(emailIntent , "Send email..."));
+
+                Log.d("vvvvvvv","8");
+
+
             }
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
-        return directory.getAbsolutePath();
+
     }
 
-    public Bitmap takeScreenShot(View view) {
-        view.setDrawingCacheEnabled(true);
-        view.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
-        view.buildDrawingCache();
 
-        if(view.getDrawingCache() == null) return null;
-
-        Bitmap snapshot = Bitmap.createBitmap(view.getDrawingCache());
-        view.setDrawingCacheEnabled(false);
-        view.destroyDrawingCache();
-
-        return snapshot;
-    }
 
 }
