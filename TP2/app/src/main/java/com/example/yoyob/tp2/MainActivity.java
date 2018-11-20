@@ -690,20 +690,14 @@ public class MainActivity extends AppCompatActivity {
                                 a.setName(val);
                                 break;
                             case "pathMidX":
-                                midX = Integer.parseInt(val);
+                                a.setPathMidX(Integer.parseInt(val));
                                 break;
                             case "pathMidY":
-                                midY = Integer.parseInt(val);
+                                a.setPathMidY(Integer.parseInt(val));
                                 break;
                         }
                     }
                     Path path = new Path();
-                    int depX = nodeDep.getX() + (nodeDep.getWidth() / 2);
-                    int depY = nodeDep.getY() + (nodeDep.getHeight() / 2);
-                    int arrX = nodeArr.getX() + (nodeArr.getWidth() / 2);
-                    int arrY = nodeArr.getY() + (nodeArr.getHeight() / 2);
-                    path.moveTo(depX,depY);
-                    path.quadTo(midX,midY,arrX,arrY);
                     a.setPath(path);
                     graph.addArc(a);
                 }

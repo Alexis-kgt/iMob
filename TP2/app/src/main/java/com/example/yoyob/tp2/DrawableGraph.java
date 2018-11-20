@@ -108,45 +108,85 @@ public class DrawableGraph extends Drawable {
         }
         Path path = new Path();
         RectF rectFDep = new RectF(arc.getNodeDep().getX(),arc.getNodeDep().getY(),arc.getNodeDep().getX()+arc.getNodeDep().getWidth(),arc.getNodeDep().getY()+arc.getNodeDep().getHeight());
-        path.addRoundRect(rectFDep, 0, 0, Path.Direction.CW);
+        path.addRoundRect(rectFDep, 15, 15, Path.Direction.CW);
         path.computeBounds(rectFDep, true);
         Region regionDep = new Region();
         regionDep.setPath(path, new Region(arc.getNodeDep().getX(),arc.getNodeDep().getY(),arc.getNodeDep().getX()+arc.getNodeDep().getWidth(),arc.getNodeDep().getY()+arc.getNodeDep().getHeight()));
         pm = new PathMeasure(arc.getPath(), false);
         float[] pointDep = {0f, 0f};
+        float[] pointDepOld = {0f, 0f};
+        float[] pointDepPrecis = {0f, 0f};
         float[] pointArr = {0f, 0f};
+        float[] pointArrOld = {0f, 0f};
+        float[] pointArrPrecis = {0f, 0f};
         pm.getPosTan(pm.getLength() * 0.5f, pointDep, null);
         boolean d = regionDep.contains((int) pointDep[0], (int) pointDep[1]);
         if(arc.getNodeArr() != null){
             while(!d){
+                pointDepOld[0] = pointDep[0];
+                pointDepOld[1] = pointDep[1];
                 pointDep[0] = (pointDep[0]+arc.getNodeDep().getX()+(arc.getNodeDep().getWidth() / 2))/2;
                 pointDep[1] = (pointDep[1]+arc.getNodeDep().getY()+(arc.getNodeDep().getHeight() / 2))/2;
                 d = regionDep.contains((int) pointDep[0], (int) pointDep[1]);
             }
+            pointDepPrecis[0] = (pointDep[0]+pointDepOld[0])/2;
+            pointDepPrecis[1] = (pointDep[1]+pointDepOld[1])/2;
+            for(int i = 0; i < 10; i++){
+                d = regionDep.contains((int) pointDepPrecis[0], (int) pointDepPrecis[1]);
+                if(d){
+                    pointDep[0]=pointDepPrecis[0];
+                    pointDep[1]=pointDepPrecis[1];
+                    pointDepPrecis[0] = (pointDep[0]+pointDepOld[0])/2;
+                    pointDepPrecis[1] = (pointDep[1]+pointDepOld[1])/2;
+                }else{
+                    pointDepOld[0]=pointDepPrecis[0];
+                    pointDepOld[1]=pointDepPrecis[1];
+                    pointDepPrecis[0] = (pointDep[0]+pointDepOld[0])/2;
+                    pointDepPrecis[1] = (pointDep[1]+pointDepOld[1])/2;
+                }
+            }
             RectF rectFArr = new RectF(arc.getNodeArr().getX(),arc.getNodeArr().getY(),arc.getNodeArr().getX()+arc.getNodeArr().getWidth(),arc.getNodeArr().getY()+arc.getNodeArr().getHeight());
-            path.addRoundRect(rectFArr, 0, 0, Path.Direction.CW);
+            path.addRoundRect(rectFArr, 15, 15, Path.Direction.CW);
             path.computeBounds(rectFArr, true);
             Region regionArr = new Region();
             regionArr.setPath(path, new Region(arc.getNodeArr().getX(),arc.getNodeArr().getY(),arc.getNodeArr().getX()+arc.getNodeArr().getWidth(),arc.getNodeArr().getY()+arc.getNodeArr().getHeight()));
             pm.getPosTan(pm.getLength() * 0.5f, pointArr, null);
             d = regionArr.contains((int) pointArr[0], (int) pointArr[1]);
             while(!d){
+                pointArrOld[0] = pointArr[0];
+                pointArrOld[1] = pointArr[1];
                 pointArr[0] = (pointArr[0]+arc.getNodeArr().getX()+(arc.getNodeArr().getWidth() / 2))/2;
                 pointArr[1] = (pointArr[1]+arc.getNodeArr().getY()+(arc.getNodeArr().getHeight() / 2))/2;
                 d = regionArr.contains((int) pointArr[0], (int) pointArr[1]);
             }
+            pointArrPrecis[0] = (pointArr[0]+pointArrOld[0])/2;
+            pointArrPrecis[1] = (pointArr[1]+pointArrOld[1])/2;
+            for(int i = 0; i < 10; i++){
+                d = regionArr.contains((int) pointArrPrecis[0], (int) pointArrPrecis[1]);
+                if(d){
+                    pointArr[0]=pointArrPrecis[0];
+                    pointArr[1]=pointArrPrecis[1];
+                    pointArrPrecis[0] = (pointArr[0]+pointArrOld[0])/2;
+                    pointArrPrecis[1] = (pointArr[1]+pointArrOld[1])/2;
+                }else{
+                    pointArrOld[0]=pointArrPrecis[0];
+                    pointArrOld[1]=pointArrPrecis[1];
+                    pointArrPrecis[0] = (pointArr[0]+pointArrOld[0])/2;
+                    pointArrPrecis[1] = (pointArr[1]+pointArrOld[1])/2;
+                }
+            }
         }
         if(arc.getNodeArr() != null && (arc.getNodeDep() != arc.getNodeArr())){
             Path edgePath = new Path();
-            edgePath.moveTo(pointDep[0],pointDep[1]);
-            edgePath.quadTo(arc.getPathMidX(),arc.getPathMidY(),pointArr[0],pointArr[1]);
+            edgePath.moveTo(pointDepPrecis[0],pointDepPrecis[1]);
+            edgePath.quadTo(arc.getPathMidX(),arc.getPathMidY(),pointArrPrecis[0],pointArrPrecis[1]);
             canvas.drawPath(edgePath,arcPaint);
         }else if(arc.getNodeDep() == arc.getNodeArr()){
             Path edgePath = new Path();
-            edgePath.moveTo(pointDep[0],pointDep[1]);
-            edgePath.quadTo(pointDep[0]+(arc.getPathMidY()-pointDep[0]), pointDep[1], arc.getPathMidX(), arc.getPathMidY());
+            edgePath.moveTo(pointDepPrecis[0],pointDepPrecis[1]);
+            edgePath.quadTo(pointDepPrecis[0]+(arc.getPathMidX()-pointDepPrecis[0]), pointDepPrecis[1], arc.getPathMidX(), arc.getPathMidY());
             edgePath.moveTo(arc.getPathMidX(), arc.getPathMidY());
-            edgePath.quadTo(pointDep[0], pointDep[1]+(arc.getPathMidY()-pointDep[1]), pointDep[0], pointDep[1]);
+            edgePath.quadTo(pointDepPrecis[0], pointDepPrecis[1]+(arc.getPathMidY()-pointDepPrecis[1]), pointDepPrecis[0], pointDepPrecis[1]);
             canvas.drawPath(edgePath,arcPaint);
         }
         else{
